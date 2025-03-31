@@ -99,9 +99,9 @@ def get_vocab(corpus, special_tokens=[]):
     return output
 
 
-train_raw = read_file("/home/alejandro/Desktop/NLU-2025-Labs/labs/dataset/PennTreeBank/ptb.test.txt")
-dev_raw = read_file("/home/alejandro/Desktop/NLU-2025-Labs/labs/dataset/PennTreeBank/ptb.valid.txt")
-test_raw = read_file("/home/alejandro/Desktop/NLU-2025-Labs/labs/dataset/PennTreeBank/ptb.test.txt")
+train_raw = read_file("ptb.test.txt")
+dev_raw = read_file("/ptb.valid.txt")
+test_raw = read_file("ptb.test.txt")
 
 # Vocab is computed only on training set 
 # We add two special tokens end of sentence and padding 
