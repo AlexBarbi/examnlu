@@ -1,5 +1,12 @@
 import spacy
 import numpy as np
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+import math
+from scipy.spatial.distance import cosine
+import torch.utils.data as data
 
 nlp = spacy.load('en_core_web_lg')
 txt = 'metropolis'
@@ -11,7 +18,6 @@ print("string:", tok.text)
 print("vector dimension:", len(tok.vector))
 print("spacy vector norm:", tok.vector_norm)
 
-from scipy.spatial.distance import cosine
 
 # let's get Paris & compare its vector to rome
 paris = nlp('city')[0]
@@ -25,12 +31,6 @@ print(tok2.text)
 print("spacy CosSim({}, {}):".format(tok.text, tok2.text), tok.similarity(tok2))
 print("scipy CosSim({}, {}):".format(tok.text, tok2.text), 1 - cosine(tok.vector, tok2.vector))
 
-import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
-import math
-import numpy as np
 
 # RNN Elman version
 # We are not going to use this since for efficiently purposes it's better to use the RNN layer provided by pytorch  
@@ -99,9 +99,9 @@ def get_vocab(corpus, special_tokens=[]):
     return output
 
 
-train_raw = read_file("/home/alejandro/Desktop/NLU-2025-Labs/labs/dataset/PennTreeBank/ptb.test.txt")
-dev_raw = read_file("/home/alejandro/Desktop/NLU-2025-Labs/labs/dataset/PennTreeBank/ptb.valid.txt")
-test_raw = read_file("/home/alejandro/Desktop/NLU-2025-Labs/labs/dataset/PennTreeBank/ptb.test.txt")
+train_raw = read_file("ptb.test.txt")
+dev_raw = read_file("ptb.valid.txt")
+test_raw = read_file("ptb.test.txt")
 
 # Vocab is computed only on training set 
 # We add two special tokens end of sentence and padding 
@@ -128,8 +128,6 @@ class Lang():
     
 lang = Lang(train_raw, ["<pad>", "<eos>"])
 
-import torch
-import torch.utils.data as data
 
 class PennTreeBank (data.Dataset):
     # Mandatory methods are __init__, __len__ and __getitem__
@@ -215,7 +213,6 @@ train_loader = DataLoader(train_dataset, batch_size=64, collate_fn=partial(colla
 dev_loader = DataLoader(dev_dataset, batch_size=128, collate_fn=partial(collate_fn, pad_token=lang.word2id["<pad>"]))
 test_loader = DataLoader(test_dataset, batch_size=128, collate_fn=partial(collate_fn, pad_token=lang.word2id["<pad>"]))
 
-import math
 def train_loop(data, optimizer, criterion, model, clip=5):
     model.train()
     loss_array = []
@@ -346,10 +343,10 @@ final_ppl, _ = eval_loop(test_loader, criterion_eval, best_model)
 print('Test ppl: ', final_ppl)
 
 # Save the best model to a file
-torch.save(best_model.state_dict(), "/home/alejandro/Desktop/NLU-2025-Labs/exam/best_model.pth")
+torch.save(best_model.state_dict(), "best_model.pth")
 
 # Save training and validation losses to a text file
-with open("/home/alejandro/Desktop/NLU-2025-Labs/exam/training_results.txt", "w") as f:
+with open("training_results.txt", "w") as f:
     f.write("Epochs: {}\n".format(sampled_epochs))
     f.write("Training Losses: {}\n".format(losses_train))
     f.write("Validation Losses: {}\n".format(losses_dev))
