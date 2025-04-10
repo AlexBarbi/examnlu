@@ -99,9 +99,9 @@ def get_vocab(corpus, special_tokens=[]):
     return output
 
 
-train_raw = read_file("ptb.test.txt")
-dev_raw = read_file("/ptb.valid.txt")
-test_raw = read_file("ptb.test.txt")
+train_raw = read_file("/home/alejandro/Desktop/NLU-2025-Labs/labs/dataset/PennTreeBank/ptb.test.txt")
+dev_raw = read_file("/home/alejandro/Desktop/NLU-2025-Labs/labs/dataset/PennTreeBank/ptb.valid.txt")
+test_raw = read_file("/home/alejandro/Desktop/NLU-2025-Labs/labs/dataset/PennTreeBank/ptb.test.txt")
 
 # Vocab is computed only on training set 
 # We add two special tokens end of sentence and padding 
@@ -164,8 +164,8 @@ class PennTreeBank (data.Dataset):
                 if x in lang.word2id:
                     tmp_seq.append(lang.word2id[x])
                 else:
-                    print('OOV found!')
-                    print('You have to deal with that') # PennTreeBank doesn't have OOV but "Trust is good, control is better!"
+                    #print('OOV found!')
+                    #print('You have to deal with that') # PennTreeBank doesn't have OOV but "Trust is good, control is better!"
                     break
             res.append(tmp_seq)
         return res
@@ -314,7 +314,7 @@ criterion_train = nn.CrossEntropyLoss(ignore_index=lang.word2id["<pad>"])
 criterion_eval = nn.CrossEntropyLoss(ignore_index=lang.word2id["<pad>"], reduction='sum')
 
 # Training loop
-n_epochs = 100
+n_epochs = 50
 patience = 3
 losses_train = []
 losses_dev = []
@@ -344,3 +344,13 @@ for epoch in pbar:
 best_model.to(DEVICE)
 final_ppl, _ = eval_loop(test_loader, criterion_eval, best_model)    
 print('Test ppl: ', final_ppl)
+
+# Save the best model to a file
+torch.save(best_model.state_dict(), "/home/alejandro/Desktop/NLU-2025-Labs/exam/best_model.pth")
+
+# Save training and validation losses to a text file
+with open("/home/alejandro/Desktop/NLU-2025-Labs/exam/training_results.txt", "w") as f:
+    f.write("Epochs: {}\n".format(sampled_epochs))
+    f.write("Training Losses: {}\n".format(losses_train))
+    f.write("Validation Losses: {}\n".format(losses_dev))
+    f.write("Best Test PPL: {}\n".format(final_ppl))
